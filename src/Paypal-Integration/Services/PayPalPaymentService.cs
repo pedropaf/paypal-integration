@@ -130,5 +130,15 @@ namespace Paypal_Integration.Services
                 // For more information, please visit [PayPal Developer REST API Reference](https://developer.paypal.com/docs/api/).
             }
         }
+
+        public static void CapturePayment(string paymentId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void RefundPayment(string paymentId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
