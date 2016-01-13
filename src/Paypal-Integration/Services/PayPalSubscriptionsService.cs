@@ -6,17 +6,20 @@ namespace Paypal_Integration.Services
 {
     public static class PayPalSubscriptionsService
     {
-        public static void CreateBillingPlan(string name, string description)
+        public static Plan CreateBillingPlan(string name, string description, string baseUrl)
         {
+            var returnUrl = baseUrl + "/Home/SubscribeSuccess";
+            var cancelUrl = baseUrl + "/Home/SubscribeCancel";
+
             // Plan Details
-            var plan = CreatePlanObject("Test Plan", "Plan for Tuts+", "returnURL", "cancelURL", 
+            var plan = CreatePlanObject("Test Plan", "Plan for Tuts+", returnUrl, cancelUrl, 
                 PlanInterval.Month, 1, (decimal)19.90, trial: true, trialLength: 1, trialPrice: 0);
 
             // PayPal Authentication tokens
             var apiContext = PayPalConfiguration.GetAPIContext();
 
             // Create plan
-            plan.Create(apiContext);
+            plan = plan.Create(apiContext);
 
             // Activate the plan
             var patchRequest = new PatchRequest()
@@ -29,6 +32,8 @@ namespace Paypal_Integration.Services
                 }
             };
             plan.Update(apiContext, patchRequest);
+
+            return plan;
         }
         
         public static void UpdateBillingPlan(string planId, string path, object value)
@@ -60,10 +65,35 @@ namespace Paypal_Integration.Services
                 value: new Plan { state = "INACTIVE" });
         }
 
-        public static void CreateBillingAgreement(string paymentId)
+        public static Agreement CreateBillingAgreement(string planId, ShippingAddress shippingAddress, 
+            string name, string description, DateTime startDate)
         {
-            throw new NotImplementedException();
+            // PayPal Authentication tokens
+            var apiContext = PayPalConfiguration.GetAPIContext();
+
+            var agreement = new Agreement()
+            {
+                name = name,
+                description = description,
+                start_date = startDate.ToString("yyyy-MM-ddTHH:mm:ss") + "Z",
+                payer = new Payer() { payment_method = "paypal" },
+                plan = new Plan() { id = planId },
+                shipping_address = shippingAddress
+            };
+            
+            var createdAgreement = agreement.Create(apiContext);
+            return createdAgreement;
         }
+
+        public static void ExecuteBillingAgreement(string token)
+        {
+            // PayPal Authentication tokens
+            var apiContext = PayPalConfiguration.GetAPIContext();
+
+            var agreement = new Agreement() { token = token };
+            var executedAgreement = agreement.Execute(apiContext);
+        }
+
         public static void SuspendBillingAgreement(string paymentId)
         {
             throw new NotImplementedException();
@@ -171,6 +201,7 @@ namespace Paypal_Integration.Services
                 cycles = "11",
                 charge_models = GetChargeModels(trialPrice, shippingAmount, taxPercentage)
             };
+            paymentDefinitions.Add(regularPayment);
 
             return paymentDefinitions;
         }
