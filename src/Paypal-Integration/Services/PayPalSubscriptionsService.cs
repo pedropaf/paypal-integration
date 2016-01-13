@@ -94,17 +94,31 @@ namespace Paypal_Integration.Services
             var executedAgreement = agreement.Execute(apiContext);
         }
 
-        public static void SuspendBillingAgreement(string paymentId)
+        public static void SuspendBillingAgreement(string agreementId)
         {
-            throw new NotImplementedException();
+            var apiContext = PayPalConfiguration.GetAPIContext();
+
+            var agreement = new Agreement() { id = agreementId };
+            agreement.Suspend(apiContext, new AgreementStateDescriptor()
+                { note = "Suspending the agreement" });
         }
-        public static void ReactivateBillingAgreement(string paymentId)
+
+        public static void ReactivateBillingAgreement(string agreementId)
         {
-            throw new NotImplementedException();
+            var apiContext = PayPalConfiguration.GetAPIContext();
+
+            var agreement = new Agreement() { id = agreementId };
+            agreement.ReActivate(apiContext, new AgreementStateDescriptor()
+                { note = "Reactivating the agreement" });
         }
-        public static void CancelBillingAgreement(string paymentId)
+    
+        public static void CancelBillingAgreement(string agreementId)
         {
-            throw new NotImplementedException();
+            var apiContext = PayPalConfiguration.GetAPIContext();
+
+            var agreement = new Agreement() { id = agreementId };
+            agreement.Cancel(apiContext, new AgreementStateDescriptor()
+                { note = "Cancelling the agreement" });
         }
 
         #region Helpers

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Paypal_Integration.Services;
+using PayPal.Api;
 
 namespace Paypal_Integration.Controllers
 {
@@ -21,6 +22,7 @@ namespace Paypal_Integration.Controllers
 
         }
 
+        #region Billing Plan and subscription
         // Create a billing plan and subscribe to it
         public IActionResult Subscribe()
         {
@@ -41,6 +43,7 @@ namespace Paypal_Integration.Controllers
         public IActionResult SubscribeSuccess(string token)
         {
             // Execute approved agreement
+            PayPalSubscriptionsService.ExecuteBillingAgreement(token);
 
             return View();
         }
@@ -50,7 +53,7 @@ namespace Paypal_Integration.Controllers
             // TODO: Handle cancelled payment
             return RedirectToAction("Error");
         }
-
+        #endregion
 
         public string GetBaseUrl()
         {
