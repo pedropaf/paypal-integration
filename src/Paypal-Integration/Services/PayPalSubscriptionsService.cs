@@ -30,6 +30,80 @@ namespace Paypal_Integration.Services
             };
             plan.Update(apiContext, patchRequest);
         }
+        
+        public static void UpdateBillingPlan(string planId, string path, object value)
+        {
+            // PayPal Authentication tokens
+            var apiContext = PayPalConfiguration.GetAPIContext();
+
+            // Retrieve Plan
+            var plan = Plan.Get(apiContext, planId);
+
+            // Activate the plan
+            var patchRequest = new PatchRequest()
+            {
+                new Patch()
+                {
+                    op = "replace",
+                    path = path,
+                    value = value
+                }
+            };
+            plan.Update(apiContext, patchRequest);
+        }
+
+        public static void DeactivateBillingPlan(string paymentId)
+        {
+            throw new NotImplementedException();
+        }
+        public static void CreateBillingAgreement(string paymentId)
+        {
+            throw new NotImplementedException();
+        }
+        public static void SuspendBillingAgreement(string paymentId)
+        {
+            throw new NotImplementedException();
+        }
+        public static void ReactivateBillingAgreement(string paymentId)
+        {
+            throw new NotImplementedException();
+        }
+        public static void CancelBillingAgreement(string paymentId)
+        {
+            throw new NotImplementedException();
+        }
+
+        #region Helpers
+        /// <summary>
+        /// Helper method for getting a currency amount.
+        /// </summary>
+        /// <param name="value">The value for the currency object.</param>
+        /// <returns></returns>
+        private static Currency GetCurrency(string value)
+        {
+            return new Currency() { value = value, currency = "USD" };
+        }
+
+        private static class PlanType
+        {
+            /// <summary>
+            /// Use Fixed when you want to create a billing plan with a fixed number of payments (cycles)
+            /// </summary>
+            public static string Fixed { get { return "fixed"; } }
+
+            /// <summary>
+            /// Use Infinite and set cycles to 0 for a billing plan that is active until it's manually cancelled
+            /// </summary>
+            public static string Infinite { get { return "infinite"; } }
+        }
+
+        private static class PlanInterval
+        {
+            public static string Week { get { return "Week"; } }
+            public static string Day { get { return "Day"; } }
+            public static string Month { get { return "Month"; } }
+            public static string Year { get { return "Year"; } }
+        }
 
         public static Plan CreatePlanObject(string planName, string planDescription, string returnUrl, string cancelUrl,
             string frequency, int frequencyInterval, decimal planPrice,
@@ -119,63 +193,6 @@ namespace Paypal_Integration.Services
             }
 
             return chargeModels;
-        }
-
-        public static void UpdateBillingPlan(string paymentId)
-        {
-            throw new NotImplementedException();
-        }
-        public static void DeactivateBillingPlan(string paymentId)
-        {
-            throw new NotImplementedException();
-        }
-        public static void CreateBillingAgreement(string paymentId)
-        {
-            throw new NotImplementedException();
-        }
-        public static void SuspendBillingAgreement(string paymentId)
-        {
-            throw new NotImplementedException();
-        }
-        public static void ReactivateBillingAgreement(string paymentId)
-        {
-            throw new NotImplementedException();
-        }
-        public static void CancelBillingAgreement(string paymentId)
-        {
-            throw new NotImplementedException();
-        }
-
-        #region Helpers
-        /// <summary>
-        /// Helper method for getting a currency amount.
-        /// </summary>
-        /// <param name="value">The value for the currency object.</param>
-        /// <returns></returns>
-        private static Currency GetCurrency(string value)
-        {
-            return new Currency() { value = value, currency = "USD" };
-        }
-
-        private static class PlanType
-        {
-            /// <summary>
-            /// Use Fixed when you want to create a billing plan with a fixed number of payments (cycles)
-            /// </summary>
-            public static string Fixed { get { return "fixed"; } }
-
-            /// <summary>
-            /// Use Infinite and set cycles to 0 for a billing plan that is active until it's manually cancelled
-            /// </summary>
-            public static string Infinite { get { return "infinite"; } }
-        }
-
-        private static class PlanInterval
-        {
-            public static string Week { get { return "Week"; } }
-            public static string Day { get { return "Day"; } }
-            public static string Month { get { return "Month"; } }
-            public static string Year { get { return "Year"; } }
         }
         #endregion
     }
