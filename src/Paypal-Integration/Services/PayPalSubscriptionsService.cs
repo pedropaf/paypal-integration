@@ -44,7 +44,7 @@ namespace Paypal_Integration.Services
             {
                 new Patch()
                 {
-                    op = "replace",
+                    op = "replace", // Only the 'replace' operation is supported when updating billing plans.
                     path = path,
                     value = value
                 }
@@ -52,10 +52,14 @@ namespace Paypal_Integration.Services
             plan.Update(apiContext, patchRequest);
         }
 
-        public static void DeactivateBillingPlan(string paymentId)
+        public static void DeactivateBillingPlan(string planId)
         {
-            throw new NotImplementedException();
+            UpdateBillingPlan(
+                planId: planId,
+                path: "/",
+                value: new Plan { state = "INACTIVE" });
         }
+
         public static void CreateBillingAgreement(string paymentId)
         {
             throw new NotImplementedException();
