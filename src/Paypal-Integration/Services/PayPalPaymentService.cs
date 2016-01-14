@@ -127,12 +127,7 @@ namespace Paypal_Integration.Services
 
             return responseCapture;
         }
-
-        public static void RefundPayment(string paymentId)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public static string GetRandomInvoiceNumber()
         {
             return new Random().Next(999999).ToString();
