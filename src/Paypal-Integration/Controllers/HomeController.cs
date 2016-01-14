@@ -22,6 +22,29 @@ namespace Paypal_Integration.Controllers
 
         }
 
+        #region PayPal Payment
+        public IActionResult CreatePayment()
+        {
+            var payment = PayPalPaymentService.CreatePayment(GetBaseUrl());
+            
+            return Redirect(payment.GetApprovalUrl());
+        }
+
+        public IActionResult PaymentCancelled()
+        {
+            // TODO: Handle cancelled payment
+            return RedirectToAction("Error");
+        }
+
+        public IActionResult PaymentSuccessful(string paymentId, string token, string PayerID)
+        {
+            // Execute Payment
+            var payment = PayPalPaymentService.ExecutePayment(paymentId, PayerID);
+
+            return View();
+        }
+        #endregion
+
         #region Billing Plan and subscription
         // Create a billing plan and subscribe to it
         public IActionResult Subscribe()
