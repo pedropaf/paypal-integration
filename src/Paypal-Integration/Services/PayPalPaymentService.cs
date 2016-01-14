@@ -6,7 +6,7 @@ namespace Paypal_Integration.Services
 {
     public static class PayPalPaymentService
     {
-        public static Payment CreatePayment(string baseUrl)
+        public static Payment CreatePayment(string baseUrl, string intent)
         {
             // ### Api Context
             // Pass in a `APIContext` object to authenticate 
@@ -18,19 +18,16 @@ namespace Paypal_Integration.Services
             // Payment Resource
             var payment = new Payment()
             {
-                intent = "sale",    // `sale` or `authorize`
+                intent = intent,    // `sale` or `authorize`
                 payer = new Payer() { payment_method = "paypal" },
                 transactions = GetTransactionsList(),
-                redirect_urls = GetReturnUrls(baseUrl)
+                redirect_urls = GetReturnUrls(baseUrl, intent)
             };
 
             // Create a payment using a valid APIContext
             var createdPayment = payment.Create(apiContext);
 
             return createdPayment;
-
-            // TODO: Save payment info in DB or Session: 
-            // paymentId = createdPayment.id
         }
 
         private static List<Transaction> GetTransactionsList()
@@ -74,15 +71,17 @@ namespace Paypal_Integration.Services
             return transactionList;
         }
 
-        private static RedirectUrls GetReturnUrls(string baseUrl)
+        private static RedirectUrls GetReturnUrls(string baseUrl, string intent)
         {
+            var returnUrl = intent == "sale" ? "/Home/PaymentSuccessful" : "/Home/AuthorizeSuccessful";
+
             // Redirect URLS
             // These URLs will determine how the user is redirected from PayPal 
             // once they have either approved or canceled the payment.
             return new RedirectUrls()
             {
                 cancel_url = baseUrl + "/Home/PaymentCancelled",
-                return_url = baseUrl + "/Home/PaymentSuccessful"
+                return_url = baseUrl + returnUrl
             };
         }
 
@@ -104,9 +103,29 @@ namespace Paypal_Integration.Services
             return executedPayment;
         }
 
-        public static void CapturePayment(string paymentId)
+        public static Capture CapturePayment(string paymentId)
         {
-            throw new NotImplementedException();
+            var apiContext = PayPalConfiguration.GetAPIContext();
+
+            var payment = Payment.Get(apiContext, paymentId);
+            var auth = payment.transactions[0].related_resources[0].authorization;
+
+            // Specify an amount to capture.  By setting 'is_final_capture' to true, all remaining funds held by the authorization will be released from the funding instrument.
+            var capture = new Capture()
+            {
+                amount = new Amount()
+                {
+                    currency = "USD",
+                    total = "4.54"
+                },
+                is_final_capture = true
+            };
+
+            // Capture an authorized payment by POSTing to
+            // URI v1/payments/authorization/{authorization_id}/capture
+            var responseCapture = auth.Capture(apiContext, capture);
+
+            return responseCapture;
         }
 
         public static void RefundPayment(string paymentId)

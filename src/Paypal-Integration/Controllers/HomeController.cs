@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Web;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Paypal_Integration.Services;
 using PayPal.Api;
@@ -22,10 +18,10 @@ namespace Paypal_Integration.Controllers
 
         }
 
-        #region PayPal Payment
+        #region Single PayPal Payment
         public IActionResult CreatePayment()
         {
-            var payment = PayPalPaymentService.CreatePayment(GetBaseUrl());
+            var payment = PayPalPaymentService.CreatePayment(GetBaseUrl(), "sale");
             
             return Redirect(payment.GetApprovalUrl());
         }
@@ -40,6 +36,23 @@ namespace Paypal_Integration.Controllers
         {
             // Execute Payment
             var payment = PayPalPaymentService.ExecutePayment(paymentId, PayerID);
+
+            return View();
+        }
+        #endregion
+
+        #region Authorize PayPal Payment
+        public IActionResult AuthorizePayment()
+        {
+            var payment = PayPalPaymentService.CreatePayment(GetBaseUrl(), "authorize");
+            
+            return Redirect(payment.GetApprovalUrl());
+        }
+
+        public IActionResult AuthorizeSuccessful(string paymentId, string token, string PayerID)
+        {
+            // Capture Payment
+            var capture = PayPalPaymentService.CapturePayment(paymentId);
 
             return View();
         }
